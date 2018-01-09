@@ -28,7 +28,9 @@ public class ItemServiceImpl implements ItemService{
         if(inventory.containsKey(name)) {
             Item item = inventory.get(name);
             synchronized (item) {
-                report.setProfit(report.getProfit().subtract(item.getCostPrice().multiply(new BigDecimal(item.getAvailableQty()))));
+                synchronized (report) {
+                    report.setProfit(report.getProfit().subtract(item.getCostPrice().multiply(new BigDecimal(item.getAvailableQty()))));
+                }
                 inventory.remove(name);
                 return true;
             }
@@ -74,7 +76,9 @@ public class ItemServiceImpl implements ItemService{
                 if (quantity > item.getAvailableQty())
                     throw new ItemNotEnoughException("item not enough");
                 //update report result
-                report.setProfit(report.getProfit().add(item.getSellingPrice().subtract(item.getCostPrice()).multiply(new BigDecimal(quantity))));
+                synchronized (report) {
+                    report.setProfit(report.getProfit().add(item.getSellingPrice().subtract(item.getCostPrice()).multiply(new BigDecimal(quantity))));
+                }
                 item.setAvailableQty(item.getAvailableQty() - quantity);
                 item.setSellingQty(item.getSellingQty() + quantity);
                 return true;
