@@ -1,40 +1,76 @@
 package management;
 
+import management.exception.ItemNotEnoughException;
+import management.exception.ItemNotFoundException;
 import management.service.ItemService;
 import management.service.ItemServiceImpl.ItemServiceImpl;
 
 import java.math.BigDecimal;
+import java.util.Scanner;
 
 public class application {
 
     public static void main(String[] args) {
         ItemService service = new ItemServiceImpl();
-        try {
-            service.create("Book01", new BigDecimal(10.5), new BigDecimal(13.79));
-            service.create("Food01", new BigDecimal(1.47), new BigDecimal(3.98));
-            service.create("Med01", new BigDecimal(30.63), new BigDecimal(34.29));
-            service.create("Tab01", new BigDecimal(57.00), new BigDecimal(84.98));
-            service.updateBuy("Tab01", 100);
-            service.updateSell("Tab01", 2);
-            service.updateBuy("Food01", 500);
-            service.updateBuy("Book01", 100);
-            service.updateBuy("Med01", 100);
-            service.updateSell("Food01", 1);
-            service.updateSell("Food01", 1);
-            service.updateSell("Tab01", 2);
-            System.out.println(service.report());
-            System.out.println();
-
-            service.delete("Book01");
-            service.updateSell("Tab01", 5);
-            service.create("Mobile01", new BigDecimal(10.51), new BigDecimal(44.56));
-            service.updateBuy("Mobile01", 250);
-            service.updateSell("Food01", 5);
-            service.updateSell("Mobile01", 4);
-            service.updateSell("Med01", 10);
-            System.out.println(service.report());
-        } catch (Exception e) {
-            e.printStackTrace();
+        Scanner reader = new Scanner(System.in);  // Reading from System.in
+        String command = "";
+        String name = "";
+        BigDecimal costPrice = BigDecimal.ZERO;
+        BigDecimal sellingPrice = BigDecimal.ZERO;
+        int quantity = 0;
+        while(true) {
+            System.out.print("Enter command: ");
+            command = reader.next(); // Scans the next
+            switch (command) {
+                case "create":
+                    name = reader.next();
+                    costPrice = reader.nextBigDecimal();
+                    sellingPrice = reader.nextBigDecimal();
+                    service.create(name, costPrice, sellingPrice);
+                    break;
+                case "updateBuy":
+                    name = reader.next();
+                    quantity = reader.nextInt();
+                    try {
+                        service.updateBuy(name, quantity);
+                    } catch (ItemNotFoundException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case "updateSell":
+                    name = reader.next();
+                    quantity = reader.nextInt();
+                    try {
+                        service.updateSell(name, quantity);
+                    } catch (ItemNotFoundException | ItemNotEnoughException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case "delete":
+                    name = reader.next();
+                    try {
+                        service.delete(name);
+                    } catch (ItemNotFoundException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case "updateSellPrice":
+                    name = reader.next();
+                    sellingPrice = reader.nextBigDecimal();
+                    try {
+                        service.updateSellPrice(name, sellingPrice);
+                    } catch (ItemNotFoundException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case "report":
+                    System.out.println(service.report());
+                    break;
+                default:
+                    System.out.println("no such command");
+                    break;
+            }
         }
+        //reader.close(); create Book01 10.50 13.79
     }
 }
